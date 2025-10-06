@@ -188,7 +188,7 @@ while game:
     if r == "y":
         continue
     else:
-        play = False
+        game = False
 
 
 os.system("cls")
