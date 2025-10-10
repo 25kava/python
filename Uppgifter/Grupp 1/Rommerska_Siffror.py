@@ -21,4 +21,4 @@ for letr in inpt:
 
 print(f"\nYour roman numerals sum to a total value of {total}")
 
-#BUG: Orkar inte lägga till att exempelvis IV är 4. Så XIV, 14, blir istället samma som XVI, 16.
+#TODO: Orkar inte lägga till att exempelvis IV är 4. Så XIV, 14, blir istället samma som XVI, 16.
