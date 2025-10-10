@@ -1,8 +1,11 @@
 from comp import *
 import os
+import time
 
 compWin = 0
 playerWin = 0
+
+s = time.time()
 
 compStart = False
 
@@ -41,7 +44,7 @@ while gameLoops >= 1:
             compWin += 1
             break
         
-        print(sum)
 
-os.system("cls")
+os.system('cls')
 print(f"Computer wins : {compWin}\nPlayer wins : {playerWin}")
+print(f"Total tid : {time.time() - s:.3f}")

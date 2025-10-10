@@ -11,7 +11,7 @@ class AI:
         if total + 1 in [4, 8, 12, 16, 18, 21]:
             self.numChoice = 1
         else:
-            self.numChoice = random.randint(1,2)
+            self.numChoice = random.randint(2,2)
 
         nums.append(self.numChoice)
         return nums
