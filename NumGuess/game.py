@@ -177,4 +177,3 @@ def setup():
 print("Welcome to the Number Guessing Game!\nI'm thinking of a number between 1 and 100 / 500 / 1000.")
 input("Press Enter to start...")
 setup()
-
