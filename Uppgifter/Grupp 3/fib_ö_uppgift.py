@@ -16,3 +16,5 @@ saknas = fib[amt] - amt
 print(f"På den sista ön saknas det {saknas} deltagare för att den ska vara full")
 
 print(f"Total tid {(time.time() - start)}")
+
+#Funkar inte, orkar inte fixa
