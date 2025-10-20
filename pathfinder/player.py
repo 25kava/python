@@ -1,65 +1,67 @@
-import random
-import time
 import math
 
 
 class PlayerV2:
-    def __init__(self, pos: list, goalCords: list):
+    def __init__(self, map: list, pos: list, goalCords: list, color, id: str):
+        self.map = map
         self.pos = pos
-        self.viableStep = []
-        self.steps = []
+        self.color = color
+        self.viableSteps = []
+        self.stepLog = []
         self.end = goalCords
+        self.id = id
+        self.steps = 0
 
-    def filterWalls(self, map: list[int, int]) -> list[str]:
-        self.viableStep = ['up', 'down', 'left', 'right']
+    def filterWalls(self) -> list[str]:
+        self.viableSteps = ['up', 'down', 'left', 'right']
         x, y = self.pos
 
-        up = map[y-1][x] != 1
-        down = map[y+1][x] != 1
-        left = map[y][x-1] != 1
-        right = map[y][x+1] != 1
+        up = self.map[y-1][x] != 1
+        down = self.map[y+1][x] != 1
+        left = self.map[y][x-1] != 1
+        right = self.map[y][x+1] != 1
 
         if not up:
-            self.viableStep.remove('up')
+            self.viableSteps.remove('up')
         if not down:
-            self.viableStep.remove('down')
+            self.viableSteps.remove('down')
         if not left:
-            self.viableStep.remove('left')
+            self.viableSteps.remove('left')
         if not right:
-            self.viableStep.remove('right')
+            self.viableSteps.remove('right')
 
-        return self.viableStep
+        return self.viableSteps
 
-    def notVisited(self, map: list[int, int]) -> list[str]:
+    def notVisited(self) -> list[str]:
         x, y = self.pos
-        temp = self.viableStep.copy()
 
-        _up = map[y-1][x] != 4
-        _down = map[y+1][x] != 4
-        _left = map[y][x-1] != 4
-        _right = map[y][x+1] != 4
+        _up = self.map[y-1][x] != self.id
+        _down = self.map[y+1][x] != self.id
+        _left = self.map[y][x-1] != self.id
+        _right = self.map[y][x+1] != self.id
 
         if not _up:
-            self.viableStep.remove('up')
+            self.viableSteps.remove('up')
         if not _down:
-            self.viableStep.remove('down')
+            self.viableSteps.remove('down')
         if not _left:
-            self.viableStep.remove('left')
+            self.viableSteps.remove('left')
         if not _right:
-            self.viableStep.remove('right')
+            self.viableSteps.remove('right')
 
-        if len(self.viableStep) == 0:
-            return self.viableStep
-        else:
-            return self.viableStep
+        # print(f"Filtered visited: {self.viableSteps}")
+        return self.viableSteps
 
     def decideNextStep(self) -> None:
-        if len(self.viableStep) > 1:
-            self.nextStep = self.decideBias(self.viableStep)
-        elif len(self.viableStep) == 1:
-            self.nextStep = self.viableStep[0]
+        if len(self.viableSteps) > 1:
+            self.nextStep = self.decideBias(self.viableSteps)
+        elif len(self.viableSteps) == 1:
+            self.nextStep = self.viableSteps[0]
         else:
             self.nextStep = 'BT'
+
+        # print(f"Took step: ['{self.nextStep}']\n")
+        self.steps += 1
 
     def calcHypo(self, x1: int, x2: int, y1: int, y2: int):
         return math.sqrt(((x1 - x2)**2) + ((y1 - y2)**2))
@@ -72,22 +74,29 @@ class PlayerV2:
         smallestIndex = None
 
         for index, candidate in enumerate(steps):
-            if candidate is "up":
+            if candidate == "up":
                 temp = self.calcHypo(endX, x, endY, y-1)
-            if candidate is "down":
+            if candidate == "down":
                 temp = self.calcHypo(endX, x, endY, y+1)
-            if candidate is "left":
+            if candidate == "left":
                 temp = self.calcHypo(endX, x-1, endY, y)
-            if candidate is "right":
+            if candidate == "right":
                 temp = self.calcHypo(endX, x+1, endY, y)
 
             if temp < smallest:
                 smallest = temp
                 smallestIndex = index
 
+        # print(f"Bias chose: ['{steps[smallestIndex]}']")
         return steps[smallestIndex]
 
-    def takeNextStep(self, map: list) -> list:
+    def takeNextStep(self) -> list:
+        self.filterWalls()
+        self.notVisited()
+        self.decideNextStep()
+
+        # print(f"Filtered walls: {self.viableSteps}")
+
         x, y = self.pos
 
         if self.nextStep == 'up':
@@ -99,18 +108,21 @@ class PlayerV2:
         elif self.nextStep == 'right':
             self.pos = [x+1, y]
         else:
-            self.pos = self.backtrack(map)
+            self.pos = self.backtrack()
 
         if self.nextStep != 'BT':
-            self.steps.append(self.pos)
+            self.stepLog.append(self.pos)
 
         return self.pos
 
-    def backtrack(self, map: list) -> list:
+    def backtrack(self) -> list:
+        try:
+            self.pos = self.stepLog.pop()
+        except:
+            exit("\nNo possible path! Try changing the position of the goal cords!")
 
-        self.pos = self.steps.pop()
-        self.filterWalls(map)
-        possible = self.notVisited(map)
+        self.filterWalls()
+        possible = self.notVisited()
 
         if possible:
             return self.pos

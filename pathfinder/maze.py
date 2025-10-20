@@ -1,12 +1,18 @@
 from player import *
 
-import sys
 import time
 import pygame
+import random
+
+finders = []
+sCords = None
 
 
-maze = []
+def r(low, high):
+    return random.randint(low, high)
 
+
+pygame.init()
 window = pygame.display.set_mode((820, 820))
 tileSize = 20
 
@@ -17,28 +23,31 @@ Red = (255, 80, 80)
 Grey = (120, 120, 120)
 
 
-with open(r"c:\Users\25kava\Desktop\VSCode\Python\pathfinder\maze.txt", "r") as f:
-    for line in f:
-        row = []
-        line = line.strip()
-        for char in line:
-            if char == "#":
-                row.append(1)
-            elif char == " ":
-                row.append(0)
-            elif char == "A":
-                row.append(2)
-            elif char == "B":
-                row.append(3)
-        maze.append(row)
+def generateMap():
+    global maze
+    maze = []
 
-goalCords = [39, 39]
-startCords = [1, 1]
+    with open(r"c:\Users\25kava\Desktop\VSCode\Python\pathfinder\maze.txt", "r") as f:
+        for line in f:
+            row = []
+            line = line.strip()
+            for char in line:
+                if char == "#":
+                    row.append(1)
+                elif char == " ":
+                    row.append(0)
+                elif char == "S":
+                    row.append(2)
+                elif char == "E":
+                    row.append(3)
+            maze.append(row)
 
-pathfinder = PlayerV2(startCords, goalCords)
+
+generateMap()
 
 
 def drawMap():
+    global startCords, goalCords
     for row_idx, row in enumerate(maze):
         for col_idx, cell in enumerate(row):
             if cell == 0:
@@ -46,44 +55,84 @@ def drawMap():
             elif cell == 1:
                 color = Black
             elif cell == 2:
+                if sCords != None:
+                    startCords = sCords
+                else:
+                    startCords = [col_idx, row_idx]
                 color = Blue
             elif cell == 3:
                 color = Red
-            elif cell == 4:
+                goalCords = [col_idx, row_idx]
+            else:
                 color = Grey
 
             pygame.draw.rect(window, color, (col_idx*tileSize,
                              row_idx*tileSize, tileSize, tileSize))
 
-    pygame.draw.rect(
-        window, finderCol, (finderPos[0]*tileSize, finderPos[1]*tileSize, tileSize, tileSize))
+    for finder in finders:
+        pygame.draw.rect(
+            window, finder.color, ((finder.pos[0]*tileSize), (finder.pos[1]*tileSize), tileSize, tileSize))
 
     pygame.display.update()
 
 
-finderPos = None
+drawMap()
 
-pygame.init()
-t = time.time()
-running = True
+time.sleep(2)
 
-while running:
-    while finderPos != [39, 39]:
-        pathfinder.filterWalls(maze)
-        pathfinder.notVisited(maze)
-        nextStep = pathfinder.decideNextStep()
-        finderPos = pathfinder.takeNextStep(maze)
+pathfinder = PlayerV2(maze, startCords, goalCords, Blue, "1")
+pathfinder2 = PlayerV2(maze, [r(1, 39), r(1, 39)], goalCords, Red, "2")
+pathfinder3 = PlayerV2(maze, [r(1, 39), r(1, 39)],
+                       goalCords, (255, 165, 0), "3")
+pathfinder4 = PlayerV2(maze, [r(1, 39), r(1, 39)],
+                       goalCords, (255, 165, 165), "4")
+pathfinder5 = PlayerV2(maze, [r(1, 39), r(1, 39)],
+                       goalCords, (255, 0, 165), "5")
 
-        maze[finderPos[1]][finderPos[0]] = 4
-        finderCol = Red
-        drawMap()
+finders.append(pathfinder)
+finders.append(pathfinder2)
+finders.append(pathfinder3)
+finders.append(pathfinder4)
+finders.append(pathfinder5)
+
+finderSPos = []
+
+drawMap()
+
+for finder in finders:
+    finderSPos.append(finder.pos)
+
+
+for index, finder in enumerate(finders):
+    print("Finder", index + 1, " : ", finder)
+    print()
+
+drawMap()
+
+for index, finder in enumerate(finders):
+
+    pygame.time.wait(2000)
+    t = time.time()
+
+    drawMap()
+    finder.map = maze
+
+    while finder.pos != goalCords:
+
+        finder.pos = finder.takeNextStep()
+        maze[finder.pos[1]][finder.pos[0]] = finder.id
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
+                exit(0)
 
-    running = False
+        drawMap()
 
-print(f"Exit found in {time.time() - t:.2f} seconds!")
-pygame.quit()
-sys.exit()
+    drawMap()
+
+    print(
+        f"Start position: {finderSPos[index]}\nFinder {index + 1} : Solved in {time.time() - t:.2f} seconds!\nTook {finder.steps} steps\n")
+
+
+# print(f"[Len] : [{len(finders)}]")
+exit()
