@@ -1,7 +1,8 @@
 import math
+import random
 
 
-class PlayerV2:
+class base:
     def __init__(self, map: list, pos: list, goalCords: list, color, id: str):
         self.map = map
         self.pos = pos
@@ -32,6 +33,9 @@ class PlayerV2:
 
         return self.viableSteps
 
+
+class DFS(base):
+
     def notVisited(self) -> list[str]:
         x, y = self.pos
 
@@ -54,7 +58,7 @@ class PlayerV2:
 
     def decideNextStep(self) -> None:
         if len(self.viableSteps) > 1:
-            self.nextStep = self.decideBias(self.viableSteps)
+            self.nextStep = random.choice(self.viableSteps)
         elif len(self.viableSteps) == 1:
             self.nextStep = self.viableSteps[0]
         else:
@@ -62,33 +66,6 @@ class PlayerV2:
 
         # print(f"Took step: ['{self.nextStep}']\n")
         self.steps += 1
-
-    def calcHypo(self, x1: int, x2: int, y1: int, y2: int):
-        return math.sqrt(((x1 - x2)**2) + ((y1 - y2)**2))
-
-    def decideBias(self, steps: list[str]) -> str:
-        x, y = self.pos
-        endX, endY = self.end
-
-        smallest = 10e10
-        smallestIndex = None
-
-        for index, candidate in enumerate(steps):
-            if candidate == "up":
-                temp = self.calcHypo(endX, x, endY, y-1)
-            if candidate == "down":
-                temp = self.calcHypo(endX, x, endY, y+1)
-            if candidate == "left":
-                temp = self.calcHypo(endX, x-1, endY, y)
-            if candidate == "right":
-                temp = self.calcHypo(endX, x+1, endY, y)
-
-            if temp < smallest:
-                smallest = temp
-                smallestIndex = index
-
-        # print(f"Bias chose: ['{steps[smallestIndex]}']")
-        return steps[smallestIndex]
 
     def takeNextStep(self) -> list:
         self.filterWalls()
@@ -128,3 +105,44 @@ class PlayerV2:
             return self.pos
 
         return self.pos
+
+
+class GoalBiasDFS(DFS):
+
+    def decideNextStep(self) -> None:
+        if len(self.viableSteps) > 1:
+            self.nextStep = self.decideBias(self.viableSteps)
+        elif len(self.viableSteps) == 1:
+            self.nextStep = self.viableSteps[0]
+        else:
+            self.nextStep = 'BT'
+
+        # print(f"Took step: ['{self.nextStep}']\n")
+        self.steps += 1
+
+    def calcHypo(self, x1: int, x2: int, y1: int, y2: int):
+        return math.sqrt(((x1 - x2)**2) + ((y1 - y2)**2))
+
+    def decideBias(self, steps: list[str]) -> str:
+        x, y = self.pos
+        endX, endY = self.end
+
+        smallest = 10e10
+        smallestIndex = None
+
+        for index, candidate in enumerate(steps):
+            if candidate == "up":
+                temp = self.calcHypo(endX, x, endY, y-1)
+            if candidate == "down":
+                temp = self.calcHypo(endX, x, endY, y+1)
+            if candidate == "left":
+                temp = self.calcHypo(endX, x-1, endY, y)
+            if candidate == "right":
+                temp = self.calcHypo(endX, x+1, endY, y)
+
+            if temp < smallest:
+                smallest = temp
+                smallestIndex = index
+
+        # print(f"Bias chose: ['{steps[smallestIndex]}']")
+        return steps[smallestIndex]

@@ -1,4 +1,4 @@
-from player import *
+from finders import *
 
 import time
 import pygame
@@ -6,15 +6,17 @@ import random
 
 finders = []
 sCords = None
+leastSteps = 10e10
 
 
 def r(low, high):
     return random.randint(low, high)
 
 
+windowSize = 820
+tileSize = windowSize / 41
 pygame.init()
-window = pygame.display.set_mode((820, 820))
-tileSize = 20
+window = pygame.display.set_mode((windowSize, windowSize))
 
 Black = (0, 0, 0)
 White = (220, 220, 220)
@@ -78,30 +80,34 @@ def drawMap():
 
 drawMap()
 
-time.sleep(2)
+# pathfinder = PlayerV2(maze, startCords, goalCords, Blue, "1")
+# pathfinder2 = PlayerV2(maze, [r(1, 39), r(1, 39)], goalCords, Red, "2")
+# pathfinder3 = PlayerV2(maze, [r(1, 39), r(1, 39)],
+#                        goalCords, (255, 165, 0), "3")
+# pathfinder4 = PlayerV2(maze, [r(1, 39), r(1, 39)],
+#                        goalCords, (255, 165, 165), "4")
+# pathfinder5 = PlayerV2(maze, [r(1, 39), r(1, 39)],
+#                        goalCords, (255, 0, 165), "5")
 
-pathfinder = PlayerV2(maze, startCords, goalCords, Blue, "1")
-pathfinder2 = PlayerV2(maze, [r(1, 39), r(1, 39)], goalCords, Red, "2")
-pathfinder3 = PlayerV2(maze, [r(1, 39), r(1, 39)],
-                       goalCords, (255, 165, 0), "3")
-pathfinder4 = PlayerV2(maze, [r(1, 39), r(1, 39)],
-                       goalCords, (255, 165, 165), "4")
-pathfinder5 = PlayerV2(maze, [r(1, 39), r(1, 39)],
-                       goalCords, (255, 0, 165), "5")
+# finders.append(pathfinder)
+# finders.append(pathfinder2)
+# finders.append(pathfinder3)
+# finders.append(pathfinder4)
+# finders.append(pathfinder5)
 
-finders.append(pathfinder)
-finders.append(pathfinder2)
-finders.append(pathfinder3)
-finders.append(pathfinder4)
-finders.append(pathfinder5)
+dfs = DFS(maze, startCords, goalCords, Blue, "1")
+finders.append(dfs)
+
+gbdfs = GoalBiasDFS(maze, startCords, goalCords, Red, "1")
+finders.append(gbdfs)
 
 finderSPos = []
-
-drawMap()
 
 for finder in finders:
     finderSPos.append(finder.pos)
 
+
+drawMap()
 
 for index, finder in enumerate(finders):
     print("Finder", index + 1, " : ", finder)
@@ -111,7 +117,6 @@ drawMap()
 
 for index, finder in enumerate(finders):
 
-    pygame.time.wait(2000)
     t = time.time()
 
     drawMap()
@@ -128,11 +133,16 @@ for index, finder in enumerate(finders):
 
         drawMap()
 
+    generateMap()
+
     drawMap()
 
     print(
         f"Start position: {finderSPos[index]}\nFinder {index + 1} : Solved in {time.time() - t:.2f} seconds!\nTook {finder.steps} steps\n")
 
+    if finder.steps < leastSteps:
+        leastSteps = finder.steps
+        leastStepsSTR = f"Finder {index + 1} had the least amount of steps : {leastSteps}"
+print(leastStepsSTR)
 
-# print(f"[Len] : [{len(finders)}]")
 exit()
