@@ -1,5 +1,8 @@
 import math
 import random
+import keyboard
+import time
+from collections import deque
 
 
 class base:
@@ -12,6 +15,7 @@ class base:
         self.end = goalCords
         self.id = id
         self.steps = 0
+        self.queue = []  # Används bara av BFS
 
     def filterWalls(self) -> list[str]:
         self.viableSteps = ['up', 'down', 'left', 'right']
@@ -107,6 +111,37 @@ class DFS(base):
         return self.pos
 
 
+class Player(DFS):
+    def decideNextStep(self):
+        if len(self.viableSteps) > 1:
+            check = True
+            while check:
+                if keyboard.is_pressed("w") and 'up' in self.viableSteps:
+                    self.nextStep = 'up'
+                    check = False
+                    time.sleep(0.15)
+                elif keyboard.is_pressed("s") and 'down' in self.viableSteps:
+                    self.nextStep = 'down'
+                    check = False
+                    time.sleep(0.15)
+                elif keyboard.is_pressed("a") and 'left' in self.viableSteps:
+                    self.nextStep = 'left'
+                    check = False
+                    time.sleep(0.15)
+                elif keyboard.is_pressed("d") and 'right' in self.viableSteps:
+                    self.nextStep = 'right'
+                    check = False
+                    time.sleep(0.15)
+
+        elif len(self.viableSteps) == 1:
+            self.nextStep = self.viableSteps[0]
+        else:
+            self.nextStep = 'BT'
+
+        self.steps += 1
+        time.sleep(0.05)
+
+
 class GoalBiasDFS(DFS):
 
     def decideNextStep(self) -> None:
@@ -146,3 +181,21 @@ class GoalBiasDFS(DFS):
 
         # print(f"Bias chose: ['{steps[smallestIndex]}']")
         return steps[smallestIndex]
+
+
+class BFS(base):
+
+    def takeNextStep(self):
+        x, y = self.pos
+
+        for _x, _y in [(x, y-1), (x, y+1), (x-1, y), (x+1, y)]:
+            if self.map[_y][_x] not in (1, self.id):
+                self.queue.append([_x, _y])
+
+        self.pos = self.queue.pop(0)
+        self.steps += 1
+
+        if self.pos == self.end:
+            return self.pos
+
+        return self.pos

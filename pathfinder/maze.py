@@ -32,7 +32,7 @@ def generateMap():
     with open(r"c:\Users\25kava\Desktop\VSCode\Python\pathfinder\maze.txt", "r") as f:
         for line in f:
             row = []
-            line = line.strip()
+            line = line
             for char in line:
                 if char == "#":
                     row.append(1)
@@ -95,11 +95,19 @@ drawMap()
 # finders.append(pathfinder4)
 # finders.append(pathfinder5)
 
-dfs = DFS(maze, startCords, goalCords, Blue, "1")
+
+bfs = BFS(maze, startCords, goalCords, Blue, "1")
+finders.append(bfs)
+
+dfs = DFS(maze, startCords, goalCords, Blue, "2")
 finders.append(dfs)
 
-gbdfs = GoalBiasDFS(maze, startCords, goalCords, Red, "1")
+gbdfs = GoalBiasDFS(maze, startCords, goalCords, Blue, "3")
 finders.append(gbdfs)
+
+plr = Player(maze, startCords, goalCords, Blue, "4")
+finders.append(plr)
+
 
 finderSPos = []
 
@@ -143,6 +151,7 @@ for index, finder in enumerate(finders):
     if finder.steps < leastSteps:
         leastSteps = finder.steps
         leastStepsSTR = f"Finder {index + 1} had the least amount of steps : {leastSteps}"
+
 print(leastStepsSTR)
 
 exit()
